@@ -1,0 +1,70 @@
+# Copyright Offene Werkstatt Wädenswil
+# SPDX-License-Identifier: MIT
+
+# LVGL library build for Bazel
+#
+# lv_conf.h is provided via label_flag. Consuming projects must set:
+#   --@lvgl//:lv_conf=//path/to:your_lv_conf
+# Or configure in platform flags / .bazelrc
+
+load("@bazel_skylib//rules:common_settings.bzl", "label_flag")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Label flag for lv_conf.h - must be set by consuming project
+label_flag(
+    name = "lv_conf",
+    build_setting_default = ":lv_conf_unset",
+)
+
+# Default target produces compile error if lv_conf not configured
+cc_library(
+    name = "lv_conf_unset",
+    hdrs = ["lv_conf_unset.h"],
+)
+
+cc_library(
+    name = "lvgl",
+    srcs = glob(
+        ["src/**/*.c"],
+        exclude = [
+            # Exclude platform-specific drivers we don't use
+            "src/drivers/sdl/**",
+            "src/drivers/x11/**",
+            "src/drivers/wayland/**",
+            "src/drivers/windows/**",
+            "src/drivers/glfw/**",
+            "src/drivers/libinput/**",
+            "src/drivers/evdev/**",
+            "src/drivers/nuttx/**",
+            "src/drivers/qnx/**",
+            # Exclude demos and examples
+            "demos/**",
+            "examples/**",
+        ],
+    ),
+    hdrs = glob(
+        [
+            "src/**/*.h",
+            "lvgl.h",
+        ],
+        exclude = [
+            "demos/**",
+            "examples/**",
+        ],
+    ),
+    copts = [
+        # Suppress warnings in third-party code
+        "-Wno-unused-function",
+        "-Wno-unused-variable",
+        "-Wno-implicit-fallthrough",
+    ],
+    includes = [
+        ".",
+        "src",
+    ],
+    deps = [
+        ":lv_conf",
+    ],
+)

@@ -1,0 +1,12 @@
+# Copyright Offene Werkstatt Wädenswil
+# SPDX-License-Identifier: MIT
+
+# LVGL Bazel module definition
+
+module(
+    name = "lvgl",
+    version = "9.4.0",
+)
+
+bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.1")
